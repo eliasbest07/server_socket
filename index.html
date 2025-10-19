@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cliente Socket.IO</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Cliente Socket.IO</h1>
+
+  <div>
+    <strong>Dispositivo:</strong>
+    <pre id="deviceInfo">Conectando...</pre>
+  </div>
+
+  <div>
+    <input type="text" id="mensaje" placeholder="Escribe un mensaje" />
+    <button onclick="enviarMensaje()">Enviar</button>
+  </div>
+
+  <div>
+    <h2>Mensajes:</h2>
+    <ul id="mensajes"></ul>
+  </div>
+
+  <script>
+    const socket = io("http://localhost:3007");
+  
+    // Mostrar info del dispositivo
+    socket.on("info-dispositivo", (info) => {
+      document.getElementById("deviceInfo").textContent = JSON.stringify(info, null, 2);
+    });
+  
+    // Recibir mensajes
+    socket.on("mensaje", (data) => {
+      const li = document.createElement("li");
+      
+      // Asegurarse de que deviceInfo existe
+      const deviceType = data.deviceInfo?.device?.type || "desktop";
+      
+      li.textContent = `[${data.id}] ${data.texto} (desde ${deviceType})`;
+      document.getElementById("mensajes").appendChild(li);
+    });
+  
+    function enviarMensaje() {
+      const input = document.getElementById("mensaje");
+      const texto = input.value;
+      if (texto) {
+        socket.emit("mensaje", texto);
+        input.value = "";
+      }
+    }
+  </script>
+  
+</body>
+</html>
